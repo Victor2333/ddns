@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  ddns:
+    image: victor/aliyunddns
+    environment:
+      - aliyun.access.region-id=$REGION_ID
+      - aliyun.access.key=$ACCESS_KEY
+      - aliyun.access.secret=$ACCESS_SECRET
+      - aliyun.update.domain-name=$DOMAIN_NAME
+      - aliyun.update.keyword=$KEYWORD
+      - aliyun.update.type=$TYPE
+    # When your system is Linux x86_64, you can use `network_mode: "host"` directly.
+    # No idea why host mode not working on ubuntu raspberry arm64
+    network_mode: "bridge"
+    # network_mode: "host"
+    restart: always

@@ -1,0 +1,9 @@
+aliyun:
+  access:
+    region-id: $REGION_ID
+    key: $KEY
+    secret: $SECRET
+  update:
+    domain-name: $DOMAIN_NAME
+    keyword: $KEY_WORD
+    type: $TYPE

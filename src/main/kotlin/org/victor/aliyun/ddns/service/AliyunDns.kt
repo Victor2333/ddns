@@ -5,14 +5,15 @@ import com.aliyuncs.alidns.model.v20150109.DescribeDomainRecordsRequest
 import com.aliyuncs.alidns.model.v20150109.DescribeDomainRecordsResponse
 import com.aliyuncs.alidns.model.v20150109.UpdateDomainRecordRequest
 import com.aliyuncs.profile.DefaultProfile
+import com.google.common.base.Function
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import org.victor.aliyun.ddns.utils.CacheUtils
 import org.victor.aliyun.ddns.utils.Fetch
+import org.victor.aliyun.ddns.utils.createLoadingCache
 import java.time.Duration
 
 @ConstructorBinding
@@ -40,22 +41,18 @@ class AliyunDns(aliyunConfig: AliyunConfig, val aliyunUpdateConfig: AliyunUpdate
 
     val client = aliyunConfig.getIAcsClient()
 
-    val cacheLoading =
-        CacheUtils.createLoadingCache<AliyunUpdateConfig, List<DescribeDomainRecordsResponse.Record>>(
-            {
+    val cacheLoading = Function<AliyunUpdateConfig, List<DescribeDomainRecordsResponse.Record>>
+    {
+        logger.info("Get data from remote {}", it!!)
+        val describeRequest = DescribeDomainRecordsRequest()
+            .apply {
+                this.domainName = it.domainName
+                this.rrKeyWord = it.keyWord
+                this.type = it.type
+            }
 
-                logger.info("Get data from remote {}", it!!)
-                val describeRequest = DescribeDomainRecordsRequest().apply {
-                    this.domainName = it.domainName
-                    this.rrKeyWord = it.keyWord
-                    this.type = it.type
-                }
-
-                client.getAcsResponse(describeRequest).domainRecords
-            },
-            1,
-            Duration.ofHours(2)
-        )
+        client.getAcsResponse(describeRequest).domainRecords
+    }.createLoadingCache(1, Duration.ofHours(2))
 
     fun sync(domainName: String, keyWord: String, type: String) {
         logger.info("domain name: {}", domainName)

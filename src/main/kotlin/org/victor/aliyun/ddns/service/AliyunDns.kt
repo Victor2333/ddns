@@ -6,6 +6,7 @@ import com.aliyuncs.alidns.model.v20150109.DescribeDomainRecordsResponse
 import com.aliyuncs.alidns.model.v20150109.UpdateDomainRecordRequest
 import com.aliyuncs.profile.DefaultProfile
 import com.google.common.base.Function
+import org.apache.logging.log4j.util.Strings
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -22,6 +23,9 @@ data class AliyunConfig(val regionId: String, val key: String, val secret: Strin
     private val logger: Logger = LoggerFactory.getLogger(AliyunConfig::class.java)
     private fun getProfile(): DefaultProfile {
         logger.info("Aliyun access config {}", this)
+        assert(Strings.isNotBlank(regionId))
+        assert(Strings.isNotBlank(key))
+        assert(Strings.isNotBlank(secret))
         return DefaultProfile.getProfile(regionId, key, secret)
     }
 
@@ -91,6 +95,9 @@ class AliyunDns(aliyunConfig: AliyunConfig, val aliyunUpdateConfig: AliyunUpdate
     @Scheduled(fixedDelay = 300000)
     fun sync() {
         try {
+            assert(Strings.isNotBlank(aliyunUpdateConfig.domainName))
+            assert(Strings.isNotBlank(aliyunUpdateConfig.keyWord))
+            assert(Strings.isNotBlank(aliyunUpdateConfig.type))
             sync(aliyunUpdateConfig.domainName, aliyunUpdateConfig.keyWord, aliyunUpdateConfig.type)
         } catch (e: Exception) {
             logger.error("sync failed", e)

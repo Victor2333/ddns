@@ -4,6 +4,6 @@ COPY src /tmp/src/
 WORKDIR /tmp/
 RUN mvn package
 
-FROM arm64v8/openjdk:16-jre
+FROM arm64v8/openjdk:16-slim
 COPY --from=BUILDER_IMG /tmp/target/*.jar app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]

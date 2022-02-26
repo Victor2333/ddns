@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   ddns:
-    image: victor/aliyunddns
+    build: .
     environment:
       - aliyun.access.region-id=$REGION_ID
       - aliyun.access.key=$ACCESS_KEY
